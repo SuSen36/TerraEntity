@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.util.Tuple;
 import java.util.List;
+import net.minecraft.core.Direction;
 
 public class WallOfFleshRenderer extends GeoNormalRenderer<WallOfFlesh> {
     static RenderBuffers bf = new RenderBuffers(Runtime.getRuntime().availableProcessors());
@@ -173,8 +174,6 @@ public class WallOfFleshRenderer extends GeoNormalRenderer<WallOfFlesh> {
 
         for (WallOfFleshPart modelPart : part) {
             if (modelPart != null && modelPart.isAlive()) {
-                poseStack.pushPose();
-
                 Vec3 localOffset = null;
 
                 int partIndex = -1;
@@ -193,7 +192,17 @@ public class WallOfFleshRenderer extends GeoNormalRenderer<WallOfFlesh> {
                 }
 
                 if (localOffset != null) {
-                    poseStack.translate(localOffset.x, localOffset.y, localOffset.z);
+                    // 应用旋转到相对位置
+                    Vec3 rotatedOffset = wall.rotateLocalOffset(localOffset);
+                    Vec3 worldPos = wall.position().add(rotatedOffset);
+                    
+                    // 使用shouldRenderGrid剔除距离过远的子实体
+                    if (!shouldRenderGrid(worldPos, wall.gridSpacing)) {
+                        continue;
+                    }
+                    
+                    poseStack.pushPose();
+                    poseStack.translate(rotatedOffset.x, rotatedOffset.y, rotatedOffset.z);
 
                     if (modelPart instanceof WallOfFleshEye eye) {
                         currentModel = new GeoBossModel<>("wall_of_flesh_eye") {
@@ -270,14 +279,11 @@ public class WallOfFleshRenderer extends GeoNormalRenderer<WallOfFlesh> {
                         currentModel = new GeoBossModel<>("wall_of_flesh_mouse");
                     }
 
-                    poseStack.mulPose(Axis.YP.rotationDegrees(wall.getYRot()));
                     poseStack.scale(1.75f, 1.75f, 1.75f);
                     super.render(wall, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+                    poseStack.popPose();
                 }
-
-                poseStack.popPose();
             }
-
         }
 
         boolean renderHitBoxes = Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes();

@@ -1,5 +1,6 @@
 package org.confluence.terraentity.entity.boss.wallofflesh;
 
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -100,6 +101,17 @@ public abstract class WallOfFleshPart extends PartEntity<WallOfFlesh> implements
         return super.getXRot();
     }
 
+    public void setYRot(float yRot) {
+        if (this.parentMob != null) {
+            super.setYRot(yRot);
+        }else super.setYRot(yRot);
+    }
+
+    public void setXRot(float xRot) {
+        if (this.parentMob != null) {
+            super.setXRot(xRot);
+        }else super.setXRot(xRot);
+    }
     public boolean hasLineOfSight(Entity entity){
         return this.level().clip(new ClipContext(this.getEyePosition(), entity.getEyePosition(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getType() == HitResult.Type.MISS;
     }

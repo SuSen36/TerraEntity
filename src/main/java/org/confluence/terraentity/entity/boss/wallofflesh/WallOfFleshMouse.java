@@ -56,7 +56,7 @@ public class WallOfFleshMouse extends WallOfFleshPart {
             if (--spawnInterval <= 0 && pendingSpawns > 0) {
                 spawnLeech(target);
                 pendingSpawns--;
-                spawnInterval = pendingSpawns > 0 ? 10 : 0; // 恢复固定间隔
+                spawnInterval = pendingSpawns > 0 ? 10 : 0;
             }
         }
         if (--summonCD <= 0) {
@@ -74,7 +74,7 @@ public class WallOfFleshMouse extends WallOfFleshPart {
 
             if (pendingSpawns == 0) {
                 pendingSpawns = count;
-                spawnInterval = 10; // 恢复固定间隔
+                spawnInterval = 10;
             }
         }
     }

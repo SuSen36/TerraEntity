@@ -27,14 +27,13 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import org.confluence.terraentity.api.entity.Boss;
-import org.confluence.terraentity.api.entity.ICollisionAttackEntity;
 import org.confluence.terraentity.effect.harmful.HorrifiedEffect;
 import org.confluence.terraentity.entity.boss.AbstractTerraBossBase;
 import org.confluence.terraentity.entity.monster.TheHungry;
 import org.confluence.terraentity.entity.monster.prefab.AbstractPrefab;
 import org.confluence.terraentity.init.TEEffects;
 import org.confluence.terraentity.init.TESounds;
-import org.confluence.terraentity.init.TETags;
+import org.confluence.terraentity.init.entity.TEBossEntities;
 import org.confluence.terraentity.init.entity.TEMonsterEntities;
 import org.confluence.terraentity.init.entity.TEAnimals;
 import org.confluence.terraentity.entity.animal.WallOfFairy;
@@ -43,7 +42,7 @@ import org.confluence.terraentity.integration.ModChecker;
 import org.confluence.terraentity.utils.CameraShakeData;
 import org.confluence.terraentity.utils.CameraShakeManager;
 import org.confluence.terraentity.utils.TEUtils;
-import org.confluence.terraentity.utils.world.WorldChunksManager;
+import org.confluence.terraentity.utils.ChunkManager;
 import org.jetbrains.annotations.NotNull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
@@ -101,6 +100,10 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
             default -> 1.0f;
         };
     }
+    public WallOfFlesh(Level level,Direction direction) {
+        this(TEBossEntities.WALL_OF_FLESH.get(), level);
+        this.setForward(direction);
+    }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
@@ -135,7 +138,7 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
                     break;
                 }
             }
-            
+
             if (!exists) {
                 this.theHungryList.add(new Tuple<>(offset, entityId));
                 this.entityData.set(DATA_HUNGRY_OFFSETS, this.theHungryList);
@@ -160,13 +163,18 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
             }
         }else if(child instanceof TheHungry hungry && !this.level().isClientSide){
             this.setHungryOffsets(localOffset, hungry.getId());
-            hungry.setInitPos(this.position().add(localOffset).toVector3f());
+            // 应用旋转到初始位置
+            Vec3 rotatedOffset = rotateLocalOffset(localOffset);
+            hungry.setInitPos(this.position().add(rotatedOffset).toVector3f());
         }
-        child.setPos(this.position().add(localOffset));
+        // 应用旋转到子实体位置
+        Vec3 rotatedOffset = rotateLocalOffset(localOffset);
+        child.setPos(this.position().add(rotatedOffset));
     }
 
     private void genGridWall() {
-        Vec3 baseOffset = this.getForward().scale(7.0F);
+        // 移除旋转，使用固定的前向偏移
+        Vec3 baseOffset = new Vec3(0, 0, 7.0F);
 
         final int MAX_DEPTH = 6;
         final double EYE_CHANCE = 0.4;
@@ -192,7 +200,6 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
             Vec3 pos = eyePositions.get(i);
             WallOfFleshEye eye = new WallOfFleshEye(this, "WallOfFleshEye" + (i + 1), 4.0f, 4.0f);
             addChild(eye, pos);
-            eye.setYRot(this.getYRot());
         }
 
         // 生成嘴巴
@@ -200,7 +207,6 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
             Vec3 pos = mouthPositions.get(i);
             WallOfFleshMouse mouth = new WallOfFleshMouse(this, "WallOfFleshMouse" + i, 3.0f, 4.0f);
             addChild(mouth, pos);
-            mouth.setYRot(this.getYRot());
         }
 
         // 生成饿鬼
@@ -217,7 +223,6 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
                 if (hungry != null) {
                     addChild(hungry, pos);
                     hungry.minion_setOwner(this);
-                    hungry.setYRot(this.getYRot());
                 }
             }
         }
@@ -241,20 +246,13 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
         double offsetX = (random.nextDouble() - 0.5) * maxOffset;
         double offsetY = (random.nextDouble() - 0.5) * maxOffset;
 
-        Vec3 worldPos;
-        if (isMovingAlongX()) {
-            worldPos = new Vec3(
-                0,
-                (centerY - gridSizeY / 2.0) * gridSpacing + offsetY,
-                (centerX - gridSizeX / 2.0) * gridSpacing + offsetX
-            ).add(baseOffset);
-        } else {
-            worldPos = new Vec3(
-                (centerX - gridSizeX / 2.0) * gridSpacing + offsetX,
-                (centerY - gridSizeY / 2.0) * gridSpacing + offsetY,
-                0
-            ).add(baseOffset);
-        }
+        // 统一使用局部坐标系，移除基于移动方向的条件逻辑
+        // 使用固定的坐标系：X轴为水平，Z轴为深度，Y轴为高度
+        Vec3 worldPos = new Vec3(
+            (centerX - gridSizeX / 2.0) * gridSpacing + offsetX,
+            (centerY - gridSizeY / 2.0) * gridSpacing + offsetY,
+            0
+        ).add(baseOffset);
 
         boolean shouldSubdivide = depth < maxDepth &&
                                 width > 1 && height > 1 &&
@@ -333,12 +331,8 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
         Map<Integer, List<Vec3>> eyesByGridX = new HashMap<>();
 
         for (Vec3 eyePos : eyePositions) {
-            int gridX;
-            if (isMovingAlongX()) {
-                gridX = (int) Math.round((eyePos.z - baseOffset.z) / gridSpacing + gridSizeX / 2.0);
-            } else {
-                gridX = (int) Math.round((eyePos.x - baseOffset.x) / gridSpacing + gridSizeX / 2.0);
-            }
+            // 统一使用X轴作为网格坐标，移除基于移动方向的条件逻辑
+            int gridX = (int) Math.round((eyePos.x - baseOffset.x) / gridSpacing + gridSizeX / 2.0);
 
             if (gridX >= 0 && gridX < gridSizeX) {
                 eyesByGridX.computeIfAbsent(gridX, k -> new ArrayList<>()).add(eyePos);
@@ -363,7 +357,7 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
                                     distance1 <= gridSpacing * 3.75 &&
                                     distance2 <= gridSpacing * 3.75) {
 
-                    eyePositions.removeIf(existingEye -> 
+                    eyePositions.removeIf(existingEye ->
                         existingEye.distanceToSqr(eye2) < gridSpacing * gridSpacing * 0.1);
 
                     boolean hasExistingMouth = false;
@@ -373,7 +367,7 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
                             break;
                         }
                     }
-                    
+
                     if (!hasExistingMouth) {
                         mouthPositions.add(eye2);
                     }
@@ -388,23 +382,15 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
                 if (distance >= gridSpacing * 1.5) {
                     double midY = (eye1.y + eye2.y) / 2.0;
 
-                    Vec3 mouthPos;
-                    if (isMovingAlongX()) {
-                        mouthPos = new Vec3(
-                            0,
-                            midY,
-                            (gridX - gridSizeX / 2.0) * gridSpacing
-                        ).add(baseOffset);
-                    } else {
-                        mouthPos = new Vec3(
-                            (gridX - gridSizeX / 2.0) * gridSpacing,
-                            midY,
-                            0
-                        ).add(baseOffset);
-                    }
+                    // 统一使用局部坐标系，移除基于移动方向的条件逻辑
+                    Vec3 mouthPos = new Vec3(
+                        (gridX - gridSizeX / 2.0) * gridSpacing,
+                        midY,
+                        0
+                    ).add(baseOffset);
 
                     double conflictDistance = gridSpacing * 0.6;
-                    
+
                     boolean hasExistingMouth = false;
                     for (Vec3 existingMouth : mouthPositions) {
                         if (existingMouth.distanceToSqr(mouthPos) < conflictDistance * conflictDistance) {
@@ -412,15 +398,15 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
                             break;
                         }
                     }
-                    
+
                     if (hasExistingMouth) {
                         continue;
                     }
-                    
-                    eyePositions.removeIf(existingEye -> 
+
+                    eyePositions.removeIf(existingEye ->
                         existingEye.distanceToSqr(mouthPos) < conflictDistance * conflictDistance);
-                    
-                    hungryPositions.removeIf(existingHungry -> 
+
+                    hungryPositions.removeIf(existingHungry ->
                         existingHungry.distanceToSqr(mouthPos) < conflictDistance * conflictDistance);
 
                     boolean hasConflict = false;
@@ -506,7 +492,9 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
 
     @Override
     public Vec3 getForward() {
-        float yawRad = (float) Math.toRadians(this.getYRot());
+        float yaw = this.getYRot();
+        float normalizedYaw = Math.round(yaw / 90.0f) * 90.0f;
+        float yawRad = (float) Math.toRadians(normalizedYaw);
         return new Vec3(-Math.sin(yawRad), 0, Math.cos(yawRad));
     }
 
@@ -518,6 +506,26 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
             case WEST -> this.setYRot(270.0F);  // 西: 270°
             default -> throw new IllegalArgumentException("Invalid direction: " + direction);
         }
+    }
+
+    /**
+     * 根据血肉墙的旋转角度旋转相对位置向量
+     * @param localOffset 原始相对位置
+     * @return 旋转后的相对位置
+     */
+    public Vec3 rotateLocalOffset(Vec3 localOffset) {
+        Direction direction = this.getDirection();
+        return switch (direction) {
+            case NORTH -> // 北方向：Z轴负向
+                    new Vec3(localOffset.x, localOffset.y, -localOffset.z);
+            case EAST -> // 东方向：X轴正向
+                    new Vec3(localOffset.z, localOffset.y, localOffset.x);
+            case SOUTH -> // 南方向：Z轴正向
+                    new Vec3(-localOffset.x, localOffset.y, localOffset.z);
+            case WEST -> // 西方向：X轴负向
+                    new Vec3(-localOffset.z, localOffset.y, -localOffset.x);
+            default -> localOffset; // 默认情况下不进行变换
+        };
     }
 
     private void updateChildPosition(Entity child) {
@@ -533,15 +541,18 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
                 }
             }
 
-            Vec3 childPos = this.position().add(localOffset);
+            Vec3 childPos = this.position().add(rotateLocalOffset(localOffset));
             Vec3 vec3 = hungry.position().subtract(hungry.getInitPos());
             Vec3 summonPos = childPos.add(vec3);
             hungry.setPos(summonPos);
             hungry.setInitPos(childPos.toVector3f());
+            // 更新饿鬼的旋转
+            hungry.setYRot(this.getYRot());
         } else if (child instanceof WallOfFleshPart part) {
             int childIndex = subEntities.indexOf(child);
             Vec3 localOffset = (childIndex >= 0 && childIndex < syncedOffsets.size()) ? syncedOffsets.get(childIndex).getB() : Vec3.ZERO;
-            Vec3 childPos = this.position().add(localOffset);
+
+            Vec3 childPos = this.position().add(rotateLocalOffset(localOffset));
             part.moveTo(childPos);
         }
     }
@@ -553,7 +564,6 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
         this.noCulling = true;
         this.setNoGravity(true);
         double summonDir = 50;
-        this.setForward(Direction.NORTH);
         Vec3 summonPos = new Vec3(this.position().x, this.level().getMinBuildHeight() + (gridSizeY * gridSpacing)/2, this.position().z).add(getForward().scale(-summonDir));
         this.moveTo(summonPos);
         this.InitPos = summonPos;
@@ -577,7 +587,6 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
                 updateChildPosition(child);
             }
         }
-
     }
 
     @Override
@@ -909,7 +918,7 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
         }
         ServerLevel serverLevel = (ServerLevel) this.level();
 
-        WorldChunksManager.loadPersistentChunksForWorld(serverLevel);
+        
 
         int gridSizeX = this.getGridSizeX();
         float gridSpacing = this.gridSpacing;
@@ -922,12 +931,12 @@ public class WallOfFlesh extends AbstractTerraBossBase implements Boss {
         for (int chunkX = minX; chunkX <= maxX; chunkX++) {
             for (int chunkZ = minZ; chunkZ <= maxZ; chunkZ++) {
                 net.minecraft.world.level.ChunkPos chunkPos = new net.minecraft.world.level.ChunkPos(chunkX, chunkZ);
-                org.confluence.terraentity.utils.world.WorldChunksManager.forceLoadChunk(serverLevel, chunkPos);
+                ChunkManager.forceLoadChunk(serverLevel, chunkPos);
             }
         }
 
         if (this.tickCount % 180 == 0) {
-            org.confluence.terraentity.utils.world.WorldChunksManager.freeChunks(serverLevel);
+            ChunkManager.freeChunks(serverLevel);
         }
     }
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
