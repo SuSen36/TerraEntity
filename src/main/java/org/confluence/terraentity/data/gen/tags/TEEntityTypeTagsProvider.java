@@ -63,9 +63,12 @@ public class TEEntityTypeTagsProvider extends EntityTypeTagsProvider {
                 TEBossEntities.EATER_OF_WORLDS.get(),
                 TEBossEntities.EATER_OF_WORLDS_SEGMENT.get(),
                 TEBossEntities.BRAIN_OF_CTHULHU.get(),
+                TEBossEntities.BRAIN_FAKE.get(),
                 TEBossEntities.QUEEN_BEE.get(),
                 TEBossEntities.SKELETRON.get(),
-                TEBossEntities.SKELETRON_HAND.get()
+                TEBossEntities.SKELETRON_HAND.get(),
+                TEBossEntities.WALL_OF_FLESH.get(),
+                TEBossEntities.HILL_OF_FLESH.get()
         };
         tag(Tags.EntityTypes.BOSSES).add(bosses);
         tag(TagKey.create(Registries.ENTITY_TYPE, TerraEntity.fromSpaceAndPath("ars_nouveau", "jar_blacklist"))).add(bosses);

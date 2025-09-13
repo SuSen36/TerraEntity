@@ -398,7 +398,7 @@
             "terra_entity:mob/tr_zombie_free_0",
             "terra_entity:mob/tr_zombie_free_1"
         ],
-        "volume": 0.77,
+        "volume": 0.05,
         "subtitle": "terra_entity.subtitle.tr_zombie_free"
     },
     "unicorn_death": {

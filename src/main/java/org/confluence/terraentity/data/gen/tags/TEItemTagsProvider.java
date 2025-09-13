@@ -7,6 +7,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import org.confluence.lib.common.LibTags;
 import org.confluence.terraentity.init.TETags;
 import org.confluence.terraentity.init.item.*;
 import org.jetbrains.annotations.NotNull;
@@ -41,5 +42,15 @@ public class TEItemTagsProvider extends ItemTagsProvider {
         TEPetItems.ITEMS.getEntries().forEach(item ->{
             tag(TETags.Items.CURIOS_PET).add(item.get());
         });
+        tag(LibTags.Items.WIP).add(
+                TEArmors.POSSESSED_ARMOR.helmet.get(),
+                TEArmors.POSSESSED_ARMOR.chestplate.get(),
+                TEArmors.POSSESSED_ARMOR.leggings.get(),
+                TEArmors.POSSESSED_ARMOR.boots.get(),
+                TEArmors.WRAITH_ARMOR.helmet.get(),
+                TEArmors.WRAITH_ARMOR.chestplate.get(),
+                TEArmors.WRAITH_ARMOR.leggings.get(),
+                TEArmors.WRAITH_ARMOR.boots.get()
+        );
     }
 }
