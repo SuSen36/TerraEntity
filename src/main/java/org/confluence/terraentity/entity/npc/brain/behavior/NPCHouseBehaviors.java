@@ -37,10 +37,10 @@ public class NPCHouseBehaviors {
                     if(serverLevel.isNight() && entity.blockPosition().distSqr(pos ) > 500){
                         entity.teleportTo(pos.getX(), pos.getY(), pos.getZ());
                     }else {
-                        walk_target.set(new WalkTarget(globalpos.pos(), speedModifier, 1));
+                        walk_target.set(new WalkTarget(pos, speedModifier, 1));
                     }
 //                    walk_target.set(new WalkTarget(entity.house.center(), speedModifier, 1));
-                    HouseManager.getInstance().tryAddHouse(entity.getUUID().toString(),
+                    HouseManager.getInstance().tryAddHouse(entity.getUUID(),
                             house.min(), house.max(), house.center());
                     // todo 设置为椅子坐标
 //                    home_pos.set(GlobalPos.of(serverLevel.dimension(), entity.house.center()));
@@ -78,6 +78,8 @@ public class NPCHouseBehaviors {
                     blockpos = oldHouse.center();
                 }
 
+                if (!serverLevel.isLoaded(blockpos)) return true;
+
                 HouseManager.getInstance().removeHouse(entity.getUUID());
                 IHouseDetector info = IHouseDetector.detect(blockpos, serverLevel);
                 if (info.isError()) {
@@ -87,7 +89,7 @@ public class NPCHouseBehaviors {
                 }
 
                 // 成功检测到房屋
-                House house = info.getHouse(entity.getStringUUID());
+                House house = info.getHouse(entity.getUUID());
 
                 if(HouseManager.getInstance().tryAddHouse(house)){
                     // 成功添加房屋

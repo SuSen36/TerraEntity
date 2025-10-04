@@ -90,7 +90,7 @@ public class HouseDetectItem extends Item {
         DebugBlocksHelper.Singleton().addDebugBlock(pos, new DebugBlocksHelper.DebugInfo(255,0,120, 120));
 
 
-        ServerBoundHousePacket.sendAction(ServerBoundHousePacket.Action.CHECK, lastInfo.getHouse(player.getStringUUID()));
+        ServerBoundHousePacket.sendAction(ServerBoundHousePacket.Action.CHECK, lastInfo.getHouse(player.getUUID()));
 
         return super.use(level, player, usedHand);
     }
@@ -105,7 +105,7 @@ public class HouseDetectItem extends Item {
             }
 
             if (lastInfo != null) {
-                ServerBoundHousePacket.sendAction(ServerBoundHousePacket.Action.ADD, lastInfo.getHouse(entity.getStringUUID()));
+                ServerBoundHousePacket.sendAction(ServerBoundHousePacket.Action.ADD, lastInfo.getHouse(entity.getUUID()));
             }else{
                 player.sendSystemMessage(Component.translatable("tooltip.terra_entity.house_detect.no_detect"));
 
@@ -123,7 +123,7 @@ public class HouseDetectItem extends Item {
                 return super.use(level, player, usedHand);
             }
             if (lastInfo != null) {
-                ServerBoundHousePacket.sendAction(ServerBoundHousePacket.Action.DELETE, lastInfo.getHouse(entity.getStringUUID()));
+                ServerBoundHousePacket.sendAction(ServerBoundHousePacket.Action.DELETE, lastInfo.getHouse(entity.getUUID()));
             }else{
                 player.sendSystemMessage(Component.translatable("tooltip.terra_entity.house_detect.no_detect"));
             }
@@ -131,7 +131,7 @@ public class HouseDetectItem extends Item {
         }
         // 未侦测到，则删除当前位置的房屋
         if (lastInfo != null) {
-            ServerBoundHousePacket.sendAction(ServerBoundHousePacket.Action.DELETE, lastInfo.getHouse(player.getStringUUID()));
+            ServerBoundHousePacket.sendAction(ServerBoundHousePacket.Action.DELETE, lastInfo.getHouse(player.getUUID()));
         }
         return super.use(level, player, usedHand);
     }

@@ -8,7 +8,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
@@ -18,7 +17,6 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.confluence.terraentity.api.entity.IMinion;
@@ -39,6 +37,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class DemonEye extends Monster implements Enemy, VariantHolder<DemonEyeVariant>, GeoEntity, DeathAnimOptions, IMinion {
+    public static final String VARIANT_KEY = "Variant";
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(DemonEye.class, EntityDataSerializers.INT);
     private final AnimatableInstanceCache CACHE = GeckoLibUtil.createInstanceCache(this);
     public Vec3 moveTargetPoint;
@@ -87,14 +86,14 @@ public class DemonEye extends Monster implements Enemy, VariantHolder<DemonEyeVa
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
-        pCompound.putInt("Variant", this.getVariant().id);
+        pCompound.putInt(VARIANT_KEY, this.getVariant().id);
         minion_saveData(pCompound);
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
-        this.setVariant(DemonEyeVariant.byId(pCompound.getInt("Variant")));
+        this.setVariant(DemonEyeVariant.byId(pCompound.getInt(VARIANT_KEY)));
         minion_readData(pCompound);
     }
 
@@ -162,7 +161,7 @@ public class DemonEye extends Monster implements Enemy, VariantHolder<DemonEyeVa
     @Override
     public void knockback(double pStrength, double pX, double pZ) {
         // TODO: 调数值
-        super.knockback(pStrength * 2, pX, pZ);
+        super.knockback(pStrength * (getVariant().big ? 1.5 : 2), pX, pZ);
     }
 
     @Override

@@ -2,7 +2,6 @@ package org.confluence.terraentity.init.item;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.data.tags.IntrinsicHolderTagsProvider;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -84,9 +83,5 @@ public class TEBoomerangItems {
                 .component(TEDataComponentTypes.BOOMERANG_READY, SingleBooleanComponent.TRUE)
 //                .component(DataComponents.UNBREAKABLE, new Unbreakable(true))
                 .component(DataComponents.ATTRIBUTE_MODIFIERS, boomerangModifier.attributeModifiersBuilder.build())));
-    }
-
-    public static void acceptTag(IntrinsicHolderTagsProvider.IntrinsicTagAppender<Item> tag) {
-        ITEMS.getEntries().forEach(item -> tag.add(item.get()));
     }
 }

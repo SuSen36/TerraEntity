@@ -12,7 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -35,6 +34,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.phys.*;
 import net.neoforged.neoforge.entity.PartEntity;
+import org.confluence.lib.util.LibUtils;
 import org.confluence.terraentity.TerraEntity;
 import org.confluence.terraentity.api.entity.Boss;
 import org.confluence.terraentity.api.entity.IAttackableProjectile;
@@ -47,7 +47,10 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -202,15 +205,15 @@ public final class TEUtils {
     /**
      * 为专家?在处理if...else if时应先使用isMaster
      */
-    public static boolean isAtLeastExpert(Level level) {
-        return level.getDifficulty().getId() >= Difficulty.NORMAL.getId();
+    public static boolean isAtLeastExpert(Level level, BlockPos pos) {
+        return LibUtils.isAtLeastExpert(level, pos);
     }
 
     /**
      * 为大师?在处理if...else if时应先使用此方法
      */
-    public static boolean isMaster(Level level) {
-        return level.getDifficulty() == Difficulty.HARD;
+    public static boolean isMaster(Level level, BlockPos pos) {
+        return LibUtils.isMaster(level, pos);
     }
 
     /**
@@ -221,23 +224,19 @@ public final class TEUtils {
      * @param master  大师难度的值
      * @return 选择到的值
      */
-    public static <T> T switchByDifficulty(Level level, T classic, T expert, T master) {
-        return switch (level.getDifficulty()) {
-            case PEACEFUL, EASY -> classic;
-            case NORMAL -> expert;
-            case HARD -> master;
-        };
+    public static <T> T switchByDifficulty(Level level, BlockPos pos, T classic, T expert, T master) {
+        return LibUtils.switchByDifficulty(level, pos, classic, expert, master);
     }
 
     /**
      * 获取当前难度的不同属性加成倍率
      * @return 倍率
      */
-    public static float getMultiple(Level level, Holder<Attribute> attribute) {
+    public static float getMultiple(Level level, BlockPos pos, Holder<Attribute> attribute) {
         if(attribute == Attributes.MAX_HEALTH)
-            return switchByDifficulty(level, 0.66f, 1f, 1.5f);
+            return switchByDifficulty(level, pos, 0.66f, 1f, 1.5f);
         else if(attribute == Attributes.ATTACK_DAMAGE)
-            return switchByDifficulty(level, 0.66f, 1f, 1.5f);
+            return switchByDifficulty(level, pos, 0.66f, 1f, 1.5f);
         else return 1f;
     }
 
@@ -248,7 +247,7 @@ public final class TEUtils {
 
     public static void multiplePlayerEnhance(LivingEntity entity) {
         if(!entity.level().isClientSide) {
-            float multiplier = getMultiple(entity.level(), Attributes.MAX_HEALTH);
+            float multiplier = getMultiple(entity.level(), entity.blockPosition(), Attributes.MAX_HEALTH);
             int size = Math.min(entity.level().players().size(), 8);
             var healthAttribute = entity.getAttribute(Attributes.MAX_HEALTH);
             if (healthAttribute != null) {
@@ -273,7 +272,7 @@ public final class TEUtils {
         if(entity instanceof Boss || entity instanceof AbstractTerraBossBase || entity instanceof ISummonMob ) return;
         if(!ServerConfig.ENHANCE_ALL_MONSTER.get() && !BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getNamespace().equals(TerraEntity.MODID)) return;
         if(!entity.level().isClientSide) {
-            float multiplier = getMultiple(entity.level(), Attributes.MAX_HEALTH);
+            float multiplier = getMultiple(entity.level(), entity.blockPosition(), Attributes.MAX_HEALTH);
             var healthAttribute = entity.getAttribute(Attributes.MAX_HEALTH);
             if (healthAttribute != null) {
                 if (!healthAttribute.hasModifier(healthKey)) {

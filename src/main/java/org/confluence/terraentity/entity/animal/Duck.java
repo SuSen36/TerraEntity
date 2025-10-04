@@ -34,6 +34,8 @@ import java.util.Map;
 public class Duck extends Chicken implements GeoEntity , IVanillaVariant<Integer> {
 
 
+    public static final String VARIANT_KEY = "Variant";
+
     public Duck(EntityType<? extends Duck> entityType, Level level) {
         super(entityType, level);
         this.getAttribute(Attributes.WATER_MOVEMENT_EFFICIENCY).setBaseValue(1);
@@ -107,18 +109,20 @@ public class Duck extends Chicken implements GeoEntity , IVanillaVariant<Integer
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
-        pCompound.putInt("Variant", this.getVariant());
+        pCompound.putInt(VARIANT_KEY, this.getVariant());
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
-        this.setVariant(pCompound.getInt("Variant"));
+        this.setVariant(pCompound.getInt(VARIANT_KEY));
     }
 
-    static Map<Integer, ResourceLocation> textures = new Int2ObjectOpenHashMap<>(Map.of(
-            0, TerraEntity.space("textures/entity/animal/duck/duck_1.png"),
-            1, TerraEntity.space("textures/entity/animal/duck/duck_2.png")
+    public static final int MALLARD_ID = 0;
+    public static final int COMMON_ID = 1;
+    static final Map<Integer, ResourceLocation> textures = new Int2ObjectOpenHashMap<>(Map.of(
+            MALLARD_ID, TerraEntity.space("textures/entity/animal/duck/duck_1.png"),
+            COMMON_ID, TerraEntity.space("textures/entity/animal/duck/duck_2.png")
     ));
 
     @Override

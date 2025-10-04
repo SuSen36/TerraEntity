@@ -71,7 +71,7 @@ public class TEChineseProvider extends LanguageProvider {
         add(TEMonsterEntities.BLOOD_CRAWLER.get(), "血爬虫");
         add(TEMonsterEntities.BLOODY_SPORE.get(), "血腥芽孢");
         add(TEMonsterEntities.FACE_MONSTER.get(), "脸怪");
-        add(TEMonsterEntities.CRIMSON_KEMERA.get(), "猩红喀迈拉");
+        add(TEMonsterEntities.CRIMERA.get(), "猩红喀迈拉");
         add(TEMonsterEntities.EATER_OF_SOULS.get(), "噬魂怪");
         add(TEMonsterEntities.DECAYEDER.get(), "腐骴");
         add(TEMonsterEntities.DEVOURER.get(), "吞噬怪");
@@ -210,7 +210,7 @@ public class TEChineseProvider extends LanguageProvider {
 
         add(TESpawnEggItems.BLOOD_CRAWLER_SPAWN_EGG.get(), "血爬虫刷怪蛋");
         add(TESpawnEggItems.BLOODY_SPORE_SPAWN_EGG.get(), "血腥芽孢刷怪蛋");
-        add(TESpawnEggItems.CRIMSON_KEMERA_SPAWN_EGG.get(), "猩红喀迈拉刷怪蛋");
+        add(TESpawnEggItems.CRIMERA_SPAWN_EGG.get(), "猩红喀迈拉刷怪蛋");
         add(TESpawnEggItems.FACE_MONSTER_SPAWN_EGG.get(), "脸怪刷怪蛋");
         add(TESpawnEggItems.FIRE_IMG_SPAWN_EGG.get(), "火焰小鬼刷怪蛋");
         add(TESpawnEggItems.SNOW_FLINX_SPAWN_EGG.get(), "小雪怪刷怪蛋");
@@ -237,7 +237,7 @@ public class TEChineseProvider extends LanguageProvider {
         add(TESpawnEggItems.UNDEAD_VIKING_SPAWN_EGG.get(), "亡灵维京海盗刷怪蛋");
 
 
-        add(TEMonsterEntities.GOBLIN_SORCERER.get(), "哥布林术士");
+        add(TEMonsterEntities.GOBLIN_SORCERER.get(), "哥布林巫士");
         add(TEMonsterEntities.GOBLIN_ARCHER.get(), "哥布林弓箭手");
         add(TEMonsterEntities.GOBLIN_PEON.get(), "哥布林苦力");
         add(TEMonsterEntities.GOBLIN_WARRIOR.get(), "哥布林战士");
@@ -250,7 +250,7 @@ public class TEChineseProvider extends LanguageProvider {
         add(TEAnimals.BUNNY.get(), "兔兔");
         add(TEAnimals.JEWEL_SQUIRREL.get(), "宝石松鼠");
         add(TEAnimals.JEWEL_BUNNY.get(), "宝石兔");
-        add(TEAnimals.BOOM_BUNNY.get(), "爆炸兔");
+        add(TEAnimals.EXPLOSIVE_BUNNY.get(), "爆炸兔");
         add(TEAnimals.DUCK.get(), "鸭子");
         add(TEAnimals.BIRD.get(), "鸟");
         add(TEAnimals.BLUE_JAY.get(), "冠蓝鸦");
@@ -358,7 +358,7 @@ public class TEChineseProvider extends LanguageProvider {
         // 动物
         add(TESpawnEggItems.SQUIRREL_SPAWN_EGG.get(), "松鼠刷怪蛋");
         add(TESpawnEggItems.JEWEL_SQUIRREL_SPAWN_EGG.get(), "宝石松鼠刷怪蛋");
-        add(TESpawnEggItems.BOOM_BUNNY_SPAWN_EGG.get(), "炸弹兔刷怪蛋");
+        add(TESpawnEggItems.EXPLOSIVE_BUNNY_SPAWN_EGG.get(), "炸弹兔刷怪蛋");
         add(TESpawnEggItems.BUNNY_SPAWN_EGG.get(), "兔兔刷怪蛋");
         add(TESpawnEggItems.JEWEL_BUNNY_SPAWN_EGG.get(), "宝石兔刷怪蛋");
         add(TESpawnEggItems.DUCK_SPAWN_EGG.get(), "鸭子刷怪蛋");
@@ -508,18 +508,18 @@ public class TEChineseProvider extends LanguageProvider {
         add("tooltip.terra_entity.house_detect.mode.check", "探测");
         add("tooltip.terra_entity.house_detect.mode.check.owner", "所有者");
         add("tooltip.terra_entity.house_detect.mode.add", "添加");
-        add("tooltip.terra_entity.house_detect.mode.add.failed", "添加房屋失败，房屋已存在!");
-        add("tooltip.terra_entity.house_detect.mode.add.success", "添加房屋成功!");
+        add("tooltip.terra_entity.house_detect.mode.add.failed", "添加房屋失败，房屋已存在！");
+        add("tooltip.terra_entity.house_detect.mode.add.success", "添加房屋成功！");
         add("tooltip.terra_entity.house_detect.mode.delete", "删除");
-        add("tooltip.terra_entity.house_detect.mode.delete.success", "删除房屋成功!");
-        add("tooltip.terra_entity.house_detect.not_npc", "这不是npc!");
-        add("tooltip.terra_entity.house_detect.no_detect", "使用前先探测房屋!");
-        add(HouseDetectInfo.DetectType.TOO_LARGE.getTranslationKey(), "这个房间太大了!");
-        add(HouseDetectInfo.DetectType.TOO_SMALL.getTranslationKey(), "这个房间太小了!");
-        add(HouseDetectInfo.DetectType.NO_DYNAMIC_LIGHT.getTranslationKey(), "房间缺少光源!");
-        add(HouseDetectInfo.DetectType.NO_CHAIR.getTranslationKey(), "房间缺少椅子!");
-        add(HouseDetectInfo.DetectType.NO_TABLE.getTranslationKey(), "房间缺少桌子!");
-        add(HouseDetectInfo.DetectType.FOUND_HOUSE.getTranslationKey(), "这个房间很合适!");
+        add("tooltip.terra_entity.house_detect.mode.delete.success", "删除房屋成功！");
+        add("tooltip.terra_entity.house_detect.not_npc", "这不是npc！");
+        add("tooltip.terra_entity.house_detect.no_detect", "使用前先探测房屋！");
+        add(HouseDetectInfo.DetectType.TOO_LARGE.getTranslationKey(), "这个房间太大了！");
+        add(HouseDetectInfo.DetectType.TOO_SMALL.getTranslationKey(), "这个房间太小了！");
+        add(HouseDetectInfo.DetectType.NO_DYNAMIC_LIGHT.getTranslationKey(), "房间缺少光源！");
+        add(HouseDetectInfo.DetectType.NO_CHAIR.getTranslationKey(), "房间缺少椅子！");
+        add(HouseDetectInfo.DetectType.NO_TABLE.getTranslationKey(), "房间缺少桌子！");
+        add(HouseDetectInfo.DetectType.FOUND_HOUSE.getTranslationKey(), "这个房间很合适！");
         add("tooltip.terra_entity.house_detect.info", "按下shift+右键 切换模式");
         add("tooltip.terra_entity.chester.desc", "按下shift+右键 切换目标容器. 你可以用它绑定一个容器");
         add("tooltip.terra_entity.chester.current", "当前容器");

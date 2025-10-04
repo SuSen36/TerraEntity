@@ -7,8 +7,11 @@ import org.confluence.terraentity.api.event.HouseDetectEvent;
 import org.confluence.terraentity.entity.npc.brain.behavior.NPCHouseBehaviors;
 import org.confluence.terraentity.item.HouseDetectItem;
 import org.confluence.terraentity.utils.AdapterUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * <p>自定义房屋检测时的检测器
@@ -34,7 +37,7 @@ public interface IHouseDetector {
         return AdapterUtils.postGameEvent(new HouseDetectEvent(pos, level)).getDetector();
     }
 
-    default House getHouse(String uuid) {
-        return new House(uuid, min(), max(), center());
+    default House getHouse(@NotNull UUID uuid) {
+        return new House(Optional.of(uuid), min(), max(), center());
     }
 }

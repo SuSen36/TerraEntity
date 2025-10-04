@@ -29,6 +29,7 @@ import java.util.Objects;
  */
 public class AnglerNPC extends AbstractTerraNPC {
 
+    public static final String WAKE_UP_KEY = "WakeUp";
     boolean triggerNight = false;
 
     public AnglerNPC(EntityType<? extends AbstractTerraNPC> entityType, Level level) {
@@ -143,8 +144,8 @@ public class AnglerNPC extends AbstractTerraNPC {
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        if (tag.contains("WakeUp")) {
-            setWakeUp(tag.getBoolean("WakeUp"));
+        if (tag.contains(WAKE_UP_KEY)) {
+            setWakeUp(tag.getBoolean(WAKE_UP_KEY));
             this.entityData.set(DATA_WAKE_UP, isWakeUp(), true);
         } else {
             this.entityData.set(DATA_WAKE_UP, false, true);
@@ -157,7 +158,7 @@ public class AnglerNPC extends AbstractTerraNPC {
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        tag.putBoolean("WakeUp", isWakeUp());
+        tag.putBoolean(WAKE_UP_KEY, isWakeUp());
         tag.putBoolean("TriggerNight", triggerNight);
     }
 

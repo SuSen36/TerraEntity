@@ -27,7 +27,6 @@ import java.util.List;
 @MethodsReturnNonnullByDefault
 public class NPCTradeRecipeCategory implements IRecipeCategory<NPCRecipe> {
     public static final RecipeType<NPCRecipe> TYPE = RecipeType.create(TerraEntity.MODID, "npc_trade", NPCRecipe.class);
-    private static final Component TITLE = Component.translatable("title.terra_entity.npc_trade");
     private final IDrawable icon;
 
     public NPCTradeRecipeCategory(IJeiHelpers jeiHelpers) {
@@ -41,7 +40,7 @@ public class NPCTradeRecipeCategory implements IRecipeCategory<NPCRecipe> {
 
     @Override
     public Component getTitle() {
-        return TITLE;
+        return Component.translatable("title.terra_entity.npc_trade");
     }
 
     @Override

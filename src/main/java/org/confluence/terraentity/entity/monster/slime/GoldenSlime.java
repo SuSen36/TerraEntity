@@ -3,6 +3,7 @@ package org.confluence.terraentity.entity.monster.slime;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -84,5 +85,11 @@ public class GoldenSlime extends Slime implements DeathAnimOptions {
         brain.clearMemories();
         setRemoved(removalReason);
 //        invalidateCaps();
+    }
+
+    @Override
+    protected void actuallyHurt(DamageSource damageSource, float damageAmount) {
+        super.actuallyHurt(damageSource, damageAmount);
+        // confluence mixin here
     }
 }

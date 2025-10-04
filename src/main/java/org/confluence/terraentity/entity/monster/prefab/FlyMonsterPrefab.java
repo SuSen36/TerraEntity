@@ -23,7 +23,7 @@ import static org.confluence.terraentity.entity.monster.prefab.AttributeBuilder.
 public class FlyMonsterPrefab extends AbstractPrefab {
 
     //在预制体上修改参数
-    public static Supplier<AttributeBuilder> CRIMSON_KEMERA_BUILDER =
+    public static Supplier<AttributeBuilder> CRIMERA_BUILDER =
             ()->new FlyMonsterPrefab().getPrefab()
                     .setSpawnWithoutLight()
                     .addGoal((g,e)->{
@@ -143,7 +143,7 @@ public class FlyMonsterPrefab extends AbstractPrefab {
             ;
 
     //从一个预制体复制参数再调整参数
-    public static Supplier<AttributeBuilder> DO_NOTHING  = ()->copyFrom(CRIMSON_KEMERA_BUILDER)
+    public static Supplier<AttributeBuilder> DO_NOTHING  = ()->copyFrom(CRIMERA_BUILDER)
             .setController((c,e)->c.add(new AnimationController<GeoAnimatable>(e,"move",10,s->PlayState.CONTINUE)));
 
 

@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.entity.PartEntity;
 import org.confluence.terraentity.api.item.ILeftClickReceiver;
 import org.confluence.terraentity.attachment.WeaponStorage;
 import org.confluence.terraentity.entity.summon.AbstractSummonMob;
@@ -32,7 +33,6 @@ import software.bernie.geckolib.animation.AnimatableManager;
  * 悠悠球
  */
 public class YoyosEntity extends AbstractSummonMob implements ILeftClickReceiver {
-
     boolean isBacking = false;
     int maxRetrieveTicks = 40;
     int retrieveTicks = 0;
@@ -44,13 +44,10 @@ public class YoyosEntity extends AbstractSummonMob implements ILeftClickReceiver
 
     public YoyosEntity(EntityType<? extends YoyosEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-
     }
 
     @Override
-    protected void registerGoals() {
-    }
-
+    protected void registerGoals() {}
 
     @Override
     public void tick() {
@@ -62,7 +59,7 @@ public class YoyosEntity extends AbstractSummonMob implements ILeftClickReceiver
         }
 
         // 存在时间
-        if(this.tickCount > this.item.getExistTime() * 20){
+        if (this.tickCount > this.item.getExistTime() * 20) {
             this.isBacking = true;
             this.noPhysics = true;
         }
@@ -73,39 +70,36 @@ public class YoyosEntity extends AbstractSummonMob implements ILeftClickReceiver
         Vec3 targetPos;
 
         float speedModifier = 1.0f;
-        if(this.isBacking){
-            targetPos = owner.position().add(0,owner.getBbHeight() * 0.5f,0);
-            if(!level().isClientSide) {
+        if (this.isBacking) {
+            targetPos = owner.position().add(0, owner.getBbHeight() * 0.5f, 0);
+            if (!level().isClientSide) {
                 if (targetPos.distanceTo(position()) < 0.5F) {
                     discard();
                 }
             }
-        }else{
+        } else {
             EntityHitResult result = TEUtils.getEyeTraceHitResult(owner, maxRange);
-            if(result != null && result.getEntity() instanceof LivingEntity living && this.canAttack(living)){
-                targetPos = living.position().add(0,living.getBbHeight() * 0.5f,0);
-                if(this.position().distanceTo(targetPos) < 0.5F) {
+            if (result != null && this.canAttackTarget(result.getEntity())) {
+                targetPos = result.getEntity().position().add(0, result.getEntity().getBbHeight() * 0.5f, 0);
+                if (this.position().distanceTo(targetPos) < 0.5F) {
                     this.noPhysics = true;
                 }
                 speedModifier = 4f;
-            }else{
+            } else {
                 targetPos = owner.getEyePosition().add(lookVec.scale(maxRange));
                 this.noPhysics = false;
             }
-
-
         }
         Vec3 startPos = position();
         Vec3 dist = targetPos.subtract(startPos);
 
 
         this.setDeltaMovement(dist.scale(0.2f * speedModifier));
-        if(this.isBacking){
+        if (this.isBacking) {
             this.retrieveTicks++;
             Vec3 force = dist.normalize().scale(this.retrieveTicks * 1.0f / this.maxRetrieveTicks);
             this.addDeltaMovement(force);
         }
-
     }
 
     @Override
@@ -116,15 +110,15 @@ public class YoyosEntity extends AbstractSummonMob implements ILeftClickReceiver
 
     @Override
     public float summon_getKnockback(Entity attacker, DamageSource damageSource) {
-         if(this.getOwner() == null){
-             return 0.0f;
-         }
-         return (float) getOwner().getAttributeValue(Attributes.ATTACK_KNOCKBACK) + 0.1f;
+        if (this.getOwner() == null) {
+            return 0.0f;
+        }
+        return (float) getOwner().getAttributeValue(Attributes.ATTACK_KNOCKBACK) + 0.1f;
     }
 
     @Override
-    public float summon_getAttackDamage(Entity entity, ServerLevel serverLevel, DamageSource damageSource){
-        if(this.getOwner() == null || !(getWeaponItem().getItem() instanceof YoyosItem yoyo)){
+    public float summon_getAttackDamage(Entity entity, ServerLevel serverLevel, DamageSource damageSource) {
+        if (this.getOwner() == null || !(getWeaponItem().getItem() instanceof YoyosItem yoyo)) {
             return 0.0f;
         }
         float f = (float) getOwner().getAttributeValue(Attributes.ATTACK_DAMAGE) + yoyo.getAttackDamage();
@@ -136,20 +130,18 @@ public class YoyosEntity extends AbstractSummonMob implements ILeftClickReceiver
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(DATA_WEAPON_ITEM, ItemStack.EMPTY);
-
-
     }
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
-        if(DATA_WEAPON_ITEM.equals(key)){
-            if(getWeaponItem().getItem() instanceof YoyosItem yoyo) {
+        if (DATA_WEAPON_ITEM.equals(key)) {
+            if (getWeaponItem().getItem() instanceof YoyosItem yoyo) {
                 this.item = yoyo;
                 this.texture = item.getTexture();
                 this.maxRange = item.getMaxRange();
             }
-        }else if(DATA_OWNERUUID_ID.equals(key)){
+        } else if (DATA_OWNERUUID_ID.equals(key)) {
             Entity owner = getOwner();
             WeaponStorage data;
             if (owner != null) {
@@ -175,7 +167,7 @@ public class YoyosEntity extends AbstractSummonMob implements ILeftClickReceiver
         if (owner != null) {
             WeaponStorage data = WeaponStorage.of(owner);
             data.yoyosEntity = null;
-            if(owner instanceof  Player player){
+            if (owner instanceof Player player) {
                 player.getCooldowns().removeCooldown(item);
             }
         }
@@ -192,9 +184,7 @@ public class YoyosEntity extends AbstractSummonMob implements ILeftClickReceiver
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-
-    }
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {}
 
     @Override
     public void onReceiveLeftClick(Player player, ItemStack itemStack) {
@@ -210,49 +200,51 @@ public class YoyosEntity extends AbstractSummonMob implements ILeftClickReceiver
     }
 
     @Override
-    public void onReceiveWhellScroll(Player player, ItemStack itemStack, int scrollAmount){
-        this.maxRange = Mth.clamp(this.maxRange + scrollAmount, 1,  ((YoyosItem)itemStack.getItem()).getMaxRange());
+    public void onReceiveWhellScroll(Player player, ItemStack itemStack, int scrollAmount) {
+        this.maxRange = Mth.clamp(this.maxRange + scrollAmount, 1, ((YoyosItem) itemStack.getItem()).getMaxRange());
     }
 
     @Override
-    public boolean canAttack(LivingEntity target) {
+    public boolean canAttackTarget(Entity target) {
         Entity entity = getOwner();
         // 不能攻击主人
-        if(entity == target) return false;
+        if (entity == target) return false;
 
         if (!target.isAttackable()) {
             // 不可攻击的实体
             return false;
         }
 
-        if(entity != null && entity.isPassengerOfSameVehicle(target)) {
-            // 不能攻击坐骑
-            return false;
-        }
-        return true;
+        // 不能攻击坐骑
+        return entity == null || !entity.isPassengerOfSameVehicle(target);
     }
 
     @Override
-    public boolean shouldDoCollision(){
+    public boolean shouldDoCollision() {
         return true;
-
     }
 
     @Override
     public boolean doHurtTarget(Entity entity) {
-        if(super.doHurtTarget(entity) && entity instanceof LivingEntity living){
-            IEffectStrategy effectStrategy = this.item.getEffectStrategy();
-            if(effectStrategy!= null){
-                effectStrategy.getEffect().accept(this.getOwner(), living);
+        if (super.doHurtTarget(entity)) {
+            LivingEntity target = null;
+            if (entity instanceof LivingEntity living) {
+                target = living;
+            } else if (entity instanceof PartEntity<?> partEntity && partEntity.getParent() instanceof LivingEntity living) {
+                target = living;
             }
-            ItemStack stack = getMainHandItem();
-            if(getOwner() != null) {
-                stack.hurtAndBreak(1, getOwner(), EquipmentSlot.MAINHAND);
+            if (target != null) {
+                IEffectStrategy effectStrategy = this.item.getEffectStrategy();
+                if (effectStrategy != null) {
+                    effectStrategy.getEffect().accept(this.getOwner(), target);
+                }
+                ItemStack stack = getMainHandItem();
+                if (getOwner() != null) {
+                    stack.hurtAndBreak(1, getOwner(), EquipmentSlot.MAINHAND);
+                }
+                return true;
             }
-            return true;
         }
         return false;
     }
-
-
 }

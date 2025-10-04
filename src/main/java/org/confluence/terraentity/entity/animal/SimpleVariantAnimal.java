@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 public class SimpleVariantAnimal extends SimpleAnimal implements IVanillaVariant<Integer> {
+    public static final String VARIANT_KEY = "Variant";
 
     public SimpleVariantAnimal(EntityType<? extends SimpleVariantAnimal> entityType, Level level) {
         this(entityType, level, Map.of());
@@ -30,9 +31,9 @@ public class SimpleVariantAnimal extends SimpleAnimal implements IVanillaVariant
 
 
     @Override
-    public void onAddedToLevel(){
+    public void onAddedToLevel() {
         super.onAddedToLevel();
-        if(!level().isClientSide && !initializedVariant){
+        if (!level().isClientSide && !initializedVariant) {
             this.setVariant(random.nextInt(getTexturesMap().size()));
         }
     }
@@ -46,6 +47,7 @@ public class SimpleVariantAnimal extends SimpleAnimal implements IVanillaVariant
     public @NotNull Integer getVariant() {
         return this.entityData.get(DATA_VARIANT_ID);
     }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {
         super.defineSynchedData(builder);
@@ -55,14 +57,14 @@ public class SimpleVariantAnimal extends SimpleAnimal implements IVanillaVariant
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
-        pCompound.putInt("Variant", this.getVariant());
+        pCompound.putInt(VARIANT_KEY, this.getVariant());
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
-        if(pCompound.contains("Variant")) {
-            this.setVariant(pCompound.getInt("Variant"));
+        if (pCompound.contains(VARIANT_KEY)) {
+            this.setVariant(pCompound.getInt(VARIANT_KEY));
             this.initializedVariant = true;
         }
     }

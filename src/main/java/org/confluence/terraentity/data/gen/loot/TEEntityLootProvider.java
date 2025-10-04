@@ -121,7 +121,7 @@ public class TEEntityLootProvider extends EntityLootSubProvider {
                 .withPool(weightLootPool(singleItem(Items.RED_DYE,1,1), 0.5f))
         );
 
-        Stream.of(TEMonsterEntities.BLOOD_CRAWLER, TEMonsterEntities.DRIPPLER, TEMonsterEntities.BLOOD_ZOMBIE, TEMonsterEntities.CRIMSON_KEMERA)
+        Stream.of(TEMonsterEntities.BLOOD_CRAWLER, TEMonsterEntities.DRIPPLER, TEMonsterEntities.BLOOD_ZOMBIE, TEMonsterEntities.CRIMERA)
                 .forEach(e-> {
                     this.add(e.get(), LootTable.lootTable()
                             .withPool(singleItemPool(TEBossSummonsItems.BRAIN_OF_CTHULHU_SUMMONS, 0.05F))

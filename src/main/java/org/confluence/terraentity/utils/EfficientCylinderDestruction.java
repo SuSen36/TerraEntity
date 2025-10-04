@@ -8,6 +8,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.function.TriConsumer;
+import org.confluence.terraentity.TerraEntity;
 
 import java.util.*;
 
@@ -59,7 +60,7 @@ public class EfficientCylinderDestruction {
      */
     public void startDestruction() {
         if (destructionTaskId != -1) {
-            System.out.println("Destruction already in progress!");
+            TerraEntity.LOGGER.debug("Destruction already in progress!");
             return;
         }
 

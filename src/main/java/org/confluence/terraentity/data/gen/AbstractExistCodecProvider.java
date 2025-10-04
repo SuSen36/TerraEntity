@@ -85,7 +85,7 @@ public abstract class AbstractExistCodecProvider<T> implements DataProvider {
             this.jsons.forEach(pair -> {
                 this.futures.add(saveStable(cachedOutput, provider, getCodec(), pair.getB(), getPath(pair.getA())));
             });
-            return CompletableFuture.allOf(this.futures.toArray(CompletableFuture[]::new));
+            return CompletableFuture.allOf(this.futures.toArray(new CompletableFuture[0]));
         });
     }
 

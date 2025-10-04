@@ -17,6 +17,7 @@ import org.confluence.terraentity.entity.npc.house.HouseManager;
 import org.confluence.terraentity.item.HouseDetectItem;
 import org.confluence.terraentity.utils.AdapterUtils;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class ServerBoundHousePacket implements CustomPacketPayload {
@@ -40,13 +41,13 @@ public class ServerBoundHousePacket implements CustomPacketPayload {
 
     public ServerBoundHousePacket(FriendlyByteBuf buf) {
         this.action = Action.values()[buf.readByte()];
-        this.house = new House(buf.readUUID().toString(), buf.readBlockPos(), buf.readBlockPos(), buf.readBlockPos());
+        this.house = new House(Optional.of(buf.readUUID()), buf.readBlockPos(), buf.readBlockPos(), buf.readBlockPos());
     }
 
 
     public void write(FriendlyByteBuf buf) {
         buf.writeByte(action.ordinal());
-        buf.writeUUID(UUID.fromString(house.uuid()));
+        buf.writeUUID(house.uuid().orElseThrow());
         buf.writeBlockPos(house.min());
         buf.writeBlockPos(house.max());
         buf.writeBlockPos(house.center());
@@ -58,7 +59,7 @@ public class ServerBoundHousePacket implements CustomPacketPayload {
             House house = packet.house;
             Action action = packet.action;
             ServerLevel level = (ServerLevel) player.level();
-            UUID id = UUID.fromString(house.uuid());
+            UUID id = house.uuid().orElseThrow();
             ItemStack stack = player.getMainHandItem();
             if(stack.getItem() instanceof HouseDetectItem item) {
                 player.getCooldowns().addCooldown(item, 10);
@@ -67,8 +68,8 @@ public class ServerBoundHousePacket implements CustomPacketPayload {
             }
             if(action == Action.CHECK){
                 var existHouse = HouseManager.getInstance().isInsideHouse(house.center());
-                if(existHouse != null){
-                    var entity = level.getEntity(UUID.fromString(existHouse.uuid()));
+                if(existHouse != null && existHouse.uuid().isPresent()){
+                    var entity = level.getEntity(existHouse.uuid().get());
                     if(entity !=null && entity.isAlive()) {
                         Component name = entity.getDisplayName();
                         if(name == null){

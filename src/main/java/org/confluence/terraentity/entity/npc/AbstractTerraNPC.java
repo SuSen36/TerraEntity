@@ -10,6 +10,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -46,6 +47,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.Tags;
+import org.confluence.lib.util.LibDateUtils;
 import org.confluence.terraentity.api.entity.animation.IUseItemAnimatable;
 import org.confluence.terraentity.api.event.NPCEvent;
 import org.confluence.terraentity.api.npc.trade.ITradeHolder;
@@ -54,13 +56,13 @@ import org.confluence.terraentity.data.mappeddata.NPCMappedDatas;
 import org.confluence.terraentity.entity.ai.goal.NPCTradeGoal;
 import org.confluence.terraentity.entity.animation.BoneStateMachine;
 import org.confluence.terraentity.entity.animation.BoneStates;
+import org.confluence.terraentity.entity.config.InitialWeapons;
 import org.confluence.terraentity.entity.npc.brain.NPCAi;
 import org.confluence.terraentity.entity.npc.chat.ChatArranger;
 import org.confluence.terraentity.entity.npc.chat.ChatManager;
 import org.confluence.terraentity.entity.npc.chat.NPCChat;
 import org.confluence.terraentity.entity.npc.house.House;
 import org.confluence.terraentity.entity.npc.house.HouseManager;
-import org.confluence.terraentity.entity.config.InitialWeapons;
 import org.confluence.terraentity.entity.npc.misc.NPCNames;
 import org.confluence.terraentity.entity.npc.mood.Mood;
 import org.confluence.terraentity.entity.npc.mood.NPCMood;
@@ -130,6 +132,8 @@ public abstract class AbstractTerraNPC extends PathfinderMob implements GeoEntit
     public BoneStateMachine<BoneStates> leftArm;
     public BoneStateMachine<BoneStates> rightArm;
 
+    protected @org.jetbrains.annotations.Nullable BlockPos spawnAtPos;
+
 
     private static final EntityDataAccessor<Boolean> DATA_RANGE_ATTACK_COOLDOWN = SynchedEntityData.defineId(AbstractTerraNPC.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<NPCTradeManager> DATA_TRADES_DATA = SynchedEntityData.defineId(AbstractTerraNPC.class, TEEntityDataSerializers.NPC_TRADES_SERIALIZER.get());
@@ -169,7 +173,7 @@ public abstract class AbstractTerraNPC extends PathfinderMob implements GeoEntit
 
     @Override
     protected PathNavigation createNavigation(Level level) {
-        return new GroundPathNavigation(this, level){
+        return new GroundPathNavigation(this, level) {
             @Override
             public boolean isStableDestination(BlockPos pos) {
                 BlockPos blockpos = pos.below();
@@ -180,7 +184,7 @@ public abstract class AbstractTerraNPC extends PathfinderMob implements GeoEntit
     }
 
     public void initName() {
-        if (!this.hasCustomName()) {
+        if (!level().isClientSide && !this.hasCustomName()) {
             String name = NPCNames.Loader.getInstance().getRandomName(getType());
             if (name != null) {
                 this.setCustomName(Component.literal(name));
@@ -202,13 +206,24 @@ public abstract class AbstractTerraNPC extends PathfinderMob implements GeoEntit
         setHouseNoUpdate(house);
     }
 
-    public House getHouse(){
+    public House getHouse() {
         return this.house;
+    }
+
+    public @org.jetbrains.annotations.Nullable BlockPos getSpawnAtPos() {
+        return spawnAtPos;
     }
 
     public void setHouseNoUpdate(House house) {
         this.house = house;
         this.entityData.set(DATA_HOUSE_DATA, house);
+        if (!house.isEmpty()) {
+            this.spawnAtPos = house.center();
+        }
+    }
+
+    public void setSpawnAtPos(@org.jetbrains.annotations.Nullable BlockPos spawnAtPos) {
+        this.spawnAtPos = spawnAtPos;
     }
 
     @Override
@@ -257,7 +272,7 @@ public abstract class AbstractTerraNPC extends PathfinderMob implements GeoEntit
 
         // 初始化对话系统
         this.chatManager = ChatManager.get(this.getType());
-        if(this.chatManager != null) {
+        if (this.chatManager != null) {
             this.chatManager.setOwner(this);
         }
 
@@ -370,10 +385,13 @@ public abstract class AbstractTerraNPC extends PathfinderMob implements GeoEntit
                 this.trades.initTrades(this, null);
             } else if (DATA_HOUSE_DATA.equals(key)) {
                 this.house = this.entityData.get(DATA_HOUSE_DATA);
+                if (!house.isEmpty()) {
+                    this.spawnAtPos = house.center();
+                }
             } else if (DATA_TRADE_PARAMS.equals(key)) {
                 this.getTradeManager().refreshAvailableTrades();
 
-            }else if(DATA_CHAT.equals(key) && level().isClientSide()){
+            } else if (DATA_CHAT.equals(key) && level().isClientSide()) {
                 this.chatCount = _chatCount;
                 this.chatArranger = new ChatArranger(this.entityData.get(DATA_CHAT).chatElement, Minecraft.getInstance().font);
                 this.chatArranger.startTick = this.tickCount;
@@ -414,6 +432,9 @@ public abstract class AbstractTerraNPC extends PathfinderMob implements GeoEntit
         if (tag.contains("House", Tag.TAG_COMPOUND)) {
             setHouseNoUpdate(House.CODEC.parse(NbtOps.INSTANCE, tag.get("House")).result().orElse(House.EMPTY));
         }
+        if (tag.contains("SpawnAtPos", Tag.TAG_COMPOUND)) {
+            this.spawnAtPos = NbtUtils.readBlockPos(tag, "SpawnAtPos").orElse(null);
+        }
         // confluence mixin here
     }
 
@@ -432,6 +453,9 @@ public abstract class AbstractTerraNPC extends PathfinderMob implements GeoEntit
         }
         if (house != null) {
             House.CODEC.encodeStart(NbtOps.INSTANCE, house).ifSuccess(tag1 -> tag.put("House", tag1));
+        }
+        if (spawnAtPos != null) {
+            tag.put("SpawnAtPos", NbtUtils.writeBlockPos(spawnAtPos));
         }
         // confluence mixin here
     }
@@ -476,12 +500,21 @@ public abstract class AbstractTerraNPC extends PathfinderMob implements GeoEntit
             this.cooldownTick = 0;
         }
         --this.chatCount;
-        if(!level().isClientSide){
-            if(this.chatManager != null) {
+        if (!level().isClientSide) {
+            if (this.chatManager != null) {
                 this.chatManager.update(1);
 //                if(this.tickCount % 150 == 0){ // todo debug
 //                    this.setChat(new NPCChat(List.of(new SpriteChatElement(List.of(TerraEntity.space("textures/gui/sprites/random_gift.png")), 2f))));
 //                }
+            }
+
+            // 由于NPCHouseBehaviors#walkToHouse疑似不能触发，于是在tick里判断
+            // 过远时传送回自己的出生点
+            if (spawnAtPos != null && level().getGameTime() % 100 == 2 && level().players().stream().noneMatch(player -> player.distanceToSqr(this) < 32 * 32)) {
+                double sqr = blockPosition().distSqr(spawnAtPos);
+                if (sqr > 64 * 64 || (sqr > 500 && LibDateUtils.isNight(level()))) {
+                    teleportTo(spawnAtPos.getX(), spawnAtPos.getY(), spawnAtPos.getZ());
+                }
             }
         }
     }
@@ -769,7 +802,7 @@ public abstract class AbstractTerraNPC extends PathfinderMob implements GeoEntit
 
     @Override
     public Vec3 getVehicleAttachmentPoint(Entity entity) {
-        return super.getVehicleAttachmentPoint(entity).add(0,0.65,0);
+        return super.getVehicleAttachmentPoint(entity).add(0, 0.65, 0);
     }
 
     @Override
@@ -782,14 +815,14 @@ public abstract class AbstractTerraNPC extends PathfinderMob implements GeoEntit
         return spawnGroupData;
     }
 
-    public void setChat(NPCChat chat){
-        if(chat.getChatElement() != null && !chat.getChatElement().isEmpty()) {
+    public void setChat(NPCChat chat) {
+        if (chat.getChatElement() != null && !chat.getChatElement().isEmpty()) {
             this.entityData.set(DATA_CHAT, chat.generateChat(this.random), true);
         }
     }
 
-    public ChatArranger getChat(){
-        if(this.chatCount > 0){
+    public ChatArranger getChat() {
+        if (this.chatCount > 0) {
             return this.chatArranger;
         }
         return null;

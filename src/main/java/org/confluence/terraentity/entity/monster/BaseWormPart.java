@@ -2,7 +2,6 @@ package org.confluence.terraentity.entity.monster;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -134,17 +133,19 @@ public class BaseWormPart extends PartEntity<BaseWorm> implements GeoEntity, ICo
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        this.getParent().setHealth(this.getParent().getHealth() - amount);
-        SoundEvent hurtSound = this.getParent().getHurtSound(source);
-        if(hurtSound!=null) {
-            playSound(hurtSound);
+//        this.getParent().setHealth(this.getParent().getHealth() - amount);
+//        SoundEvent hurtSound = this.getParent().getHurtSound(source);
+//        if(hurtSound!=null) {
+//            playSound(hurtSound);
+//        }
+//        if(this.getParent().getHealth() <= 0) {
+//            return false;
+//        }
+        if (getParent().hurt(source, amount)) {
+            this.hurtTime = 10;
+            return true;
         }
-        if(this.getParent().getHealth() <= 0) {
-            return false;
-        }
-
-        this.hurtTime = 10;
-        return true;
+        return false;
     }
 
     public boolean isPickable() {

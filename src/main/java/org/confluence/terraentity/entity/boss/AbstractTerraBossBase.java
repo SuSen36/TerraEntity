@@ -105,7 +105,7 @@ public abstract class AbstractTerraBossBase extends Monster implements GeoEntity
     }
 
     public float getAttributeMultiplier(Holder<Attribute> attribute){
-        return getMultiple(level(), attribute);
+        return getMultiple(level(), blockPosition(), attribute);
     }
 
     /**

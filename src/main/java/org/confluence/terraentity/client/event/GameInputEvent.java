@@ -37,8 +37,8 @@ public class GameInputEvent {
             return;
         }
 
-        if(!player.isSpectator() && item instanceof ILeftClickStateItem item1){
-            if(Minecraft.getInstance().mouseHandler.isLeftPressed()) { // 暂时可以这样写省性能，如果后面有新需求，需要注释掉
+        if (!player.isSpectator() && item instanceof ILeftClickStateItem item1) {
+            if (Minecraft.getInstance().mouseHandler.isLeftPressed()) { // 暂时可以这样写省性能，如果后面有新需求，需要注释掉
                 if (event.getScrollDeltaY() > 0) {
                     ServerBoundEventPacket.wheelUp();
                 } else {
@@ -83,8 +83,8 @@ public class GameInputEvent {
 
     @SubscribeEvent
     public static void KeyPressed(InputEvent.Key event) {
-        if(event.getAction() == 1 && ModChecker.curios.isLoaded()){
-            if(TEKeyBindings.RIDE.get().matches(event.getKey(), event.getModifiers())) {
+        if (event.getAction() == InputConstants.PRESS && ModChecker.curios.isLoaded()) {
+            if (TEKeyBindings.RIDE.get().isDown()) { // 这个方法不会在其它地方触发导致崩溃
                 ServerBoundEventPacket.rideOrLeave();
             }
         }

@@ -93,11 +93,11 @@ public class Bird extends Animal implements GeoEntity, FlyingAnimal {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 6.0).add(Attributes.FLYING_SPEED, 0.4000000059604645).add(Attributes.MOVEMENT_SPEED, 0.20000000298023224).add(Attributes.ATTACK_DAMAGE, 3.0);
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 6.0).add(Attributes.FLYING_SPEED, 0.4000000059604645).add(Attributes.MOVEMENT_SPEED, 0.20000000298023224).add(Attributes.ATTACK_DAMAGE, 3.0).add(Attributes.FALL_DAMAGE_MULTIPLIER, 0);
     }
 
     public static AttributeSupplier.Builder createInspectAttributes() {
-        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 3.0).add(Attributes.FLYING_SPEED, 0.25).add(Attributes.MOVEMENT_SPEED, 0.18).add(Attributes.ATTACK_DAMAGE, 3.0);
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 3.0).add(Attributes.FLYING_SPEED, 0.25).add(Attributes.MOVEMENT_SPEED, 0.18).add(Attributes.ATTACK_DAMAGE, 3.0).add(Attributes.FALL_DAMAGE_MULTIPLIER, 0);
     }
 
     protected @NotNull PathNavigation createNavigation(@NotNull Level level) {

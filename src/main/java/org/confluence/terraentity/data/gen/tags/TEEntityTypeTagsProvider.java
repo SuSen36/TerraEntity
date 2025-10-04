@@ -89,5 +89,4 @@ public class TEEntityTypeTagsProvider extends EntityTypeTagsProvider {
                 TEBossEntities.WALL_OF_FLESH.get()
         );
     }
-
 }

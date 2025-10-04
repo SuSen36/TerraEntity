@@ -106,7 +106,7 @@ public class LandMonsterPrefab extends AbstractPrefab {
                     .setNoAttachAttack()
                     .setTicker(e->{
                         if(!e.level().isClientSide && e.isAlive() && e.tickCount == 60 + e.getId() % 40){
-                            List<EntityType<? extends Entity>> entities = List.of(TEMonsterEntities.BLOOD_CRAWLER.get(), TEMonsterEntities.FACE_MONSTER.get(), TEMonsterEntities.CRIMSON_KEMERA.get());
+                            List<EntityType<? extends Entity>> entities = List.of(TEMonsterEntities.BLOOD_CRAWLER.get(), TEMonsterEntities.FACE_MONSTER.get(), TEMonsterEntities.CRIMERA.get());
                             Entity summon = entities.get(e.getRandom().nextIntBetweenInclusive(0,entities.size()-1)).create(e.level());
                             if(summon!=null) {
                                 summon.setPos(e.getX(), e.getY(), e.getZ());

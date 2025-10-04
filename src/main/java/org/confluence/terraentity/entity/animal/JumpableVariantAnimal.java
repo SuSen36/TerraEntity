@@ -14,6 +14,8 @@ import java.util.Map;
 
 public class JumpableVariantAnimal extends JumpableAnimal implements IVanillaVariant<Integer> {
 
+    public static final String VARIANT_KEY = "Variant";
+
     public JumpableVariantAnimal(EntityType<? extends JumpableAnimal> entityType, Level level, Map<Integer, ResourceLocation> texturesMap) {
         super(entityType, level);
         this.texturesMap = texturesMap;
@@ -25,9 +27,9 @@ public class JumpableVariantAnimal extends JumpableAnimal implements IVanillaVar
 
 
     @Override
-    public void onAddedToLevel(){
+    public void onAddedToLevel() {
         super.onAddedToLevel();
-        if(!level().isClientSide && !initializedVariant){
+        if (!level().isClientSide && !initializedVariant) {
             this.setVariant(random.nextInt(getTexturesMap().size()));
         }
     }
@@ -41,6 +43,7 @@ public class JumpableVariantAnimal extends JumpableAnimal implements IVanillaVar
     public @NotNull Integer getVariant() {
         return this.entityData.get(DATA_VARIANT_ID);
     }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {
         super.defineSynchedData(builder);
@@ -50,14 +53,14 @@ public class JumpableVariantAnimal extends JumpableAnimal implements IVanillaVar
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
-        pCompound.putInt("Variant", this.getVariant());
+        pCompound.putInt(VARIANT_KEY, this.getVariant());
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
-        if(pCompound.contains("Variant")) {
-            this.setVariant(pCompound.getInt("Variant"));
+        if (pCompound.contains(VARIANT_KEY)) {
+            this.setVariant(pCompound.getInt(VARIANT_KEY));
             this.initializedVariant = true;
         }
     }

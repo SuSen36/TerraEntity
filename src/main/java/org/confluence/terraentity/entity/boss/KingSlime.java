@@ -54,8 +54,6 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.confluence.terraentity.utils.TEUtils.isAtLeastExpert;
-
 /**
  * 史王
  */
@@ -458,9 +456,10 @@ public class KingSlime extends Slime implements DeathAnimOptions, IBossFSM, Boss
     private void spawnSlime(LivingEntity target) {
         if (level() instanceof ServerLevel serverLevel) {
             BaseSlime slime = new BaseSlime(TEMonsterEntities.BLUE_SLIME.get(), serverLevel, COLOR_INT, 2);
-            slime.setPos(getOnPos().getX(), getOnPos().getY() + 0.5, getOnPos().getZ());
+            BlockPos pos = blockPosition();
+            slime.setPos(pos.getX(), pos.getY() + 0.5, pos.getZ());
             slime.setTarget(target);
-            if (isAtLeastExpert(serverLevel)) {
+            if (TEUtils.isAtLeastExpert(serverLevel, pos)) {
                 //todo 尖刺史莱姆
                 //尖刺史莱姆，你的头顶怎么尖尖的
             }

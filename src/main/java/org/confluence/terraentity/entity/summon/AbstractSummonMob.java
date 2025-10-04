@@ -14,6 +14,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.entity.PartEntity;
 import org.confluence.terraentity.api.entity.ICollisionAttackEntity;
 import org.confluence.terraentity.api.entity.ISummonMob;
 import org.jetbrains.annotations.Nullable;
@@ -39,14 +40,14 @@ public abstract class AbstractSummonMob extends TamableAnimal implements GeoEnti
 
     /* Collision Attack API */
 
-    CollisionProperties collisionProperties = new CollisionProperties(5,5,0.75f);
+    CollisionProperties collisionProperties = new CollisionProperties(5, 5, 0.75f);
 
     public CollisionProperties getCollisionProperties() {
         return collisionProperties;
     }
 
     @Override
-    public boolean shouldDoCollision(){
+    public boolean shouldDoCollision() {
         return getTarget() != null;
 
     }
@@ -54,17 +55,16 @@ public abstract class AbstractSummonMob extends TamableAnimal implements GeoEnti
     @Override
     public void tick() {
         super.tick();
-        if(summon_discardWhenOwnerDie()) return;
+        if (summon_discardWhenOwnerDie()) return;
 
-        doCollisionAttack(e -> e instanceof LivingEntity living && this.canAttack(living),
-                this::doHurtTarget);
+        doCollisionAttack(this::canAttackTarget, this::doHurtTarget);
 
-        if(this.getOwner() != null) {
+        if (this.getOwner() != null) {
             this.distanceToOwner = this.distanceTo(this.getOwner());
         }
     }
 
-/* Summon API */
+    /* Summon API */
 
     public int cost;
 
@@ -83,11 +83,20 @@ public abstract class AbstractSummonMob extends TamableAnimal implements GeoEnti
         summon_registerCommonGoals();
     }
 
+    @Deprecated
     @Override
-    public boolean canAttack(LivingEntity living) {
-        return super.canAttack(living) &&
-                (living instanceof Enemy && !(living instanceof NeutralMob) || living == getTarget());
+    public final boolean canAttack(LivingEntity living) {
+        return super.canAttack(living);
+    }
 
+    public boolean canAttackTarget(Entity target) {
+        if (target instanceof PartEntity<?> partEntity) {
+            target = partEntity.getParent();
+        }
+        if (target instanceof LivingEntity living) {
+            return canAttack(living) && (target instanceof Enemy && !(target instanceof NeutralMob) || target == getTarget());
+        }
+        return false;
     }
 
     @Override
@@ -138,7 +147,7 @@ public abstract class AbstractSummonMob extends TamableAnimal implements GeoEnti
         return DATA_OWNERUUID_ID;
     }
 
-/* Geo API */
+    /* Geo API */
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
@@ -147,7 +156,7 @@ public abstract class AbstractSummonMob extends TamableAnimal implements GeoEnti
         return cache;
     }
 
-/* super API */
+    /* super API */
 
     @Override
     public boolean isFood(ItemStack itemStack) {

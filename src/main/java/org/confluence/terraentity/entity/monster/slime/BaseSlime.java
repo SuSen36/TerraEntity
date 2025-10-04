@@ -231,7 +231,7 @@ public class BaseSlime extends Slime implements DeathAnimOptions {
                 if (this.level() instanceof ServerLevel serverlevel)
                     EnchantmentHelper.doPostAttackEffects(serverlevel, pLivingEntity, damagesource);
                 if (getType() == TEMonsterEntities.ICE_SLIME.get()) {
-                    if (TEUtils.isMaster(level()) || (TEUtils.isAtLeastExpert(level()) && level().random.nextBoolean())) {
+                    if (TEUtils.isMaster(level(), blockPosition()) || (TEUtils.isAtLeastExpert(level(), blockPosition()) && level().random.nextBoolean())) {
                         pLivingEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 0), this);
                     }
                 } else if (getType() == TEMonsterEntities.LAVA_SLIME.get()) {
@@ -244,7 +244,7 @@ public class BaseSlime extends Slime implements DeathAnimOptions {
     @Override
     protected void tickDeath() {
         super.tickDeath();
-        if (level() instanceof ServerLevel level && getType() == TEMonsterEntities.LAVA_SLIME.get() && TEUtils.isAtLeastExpert(level)) {
+        if (level() instanceof ServerLevel level && getType() == TEMonsterEntities.LAVA_SLIME.get() && TEUtils.isAtLeastExpert(level, blockPosition())) {
             BlockPos containing = BlockPos.containing(position());
             BlockState blockState = level.getBlockState(containing);
             if (blockState.isAir() || blockState.canBeReplaced(Fluids.LAVA)) {

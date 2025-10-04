@@ -29,7 +29,7 @@ public class HouseStoreSaver extends SavedData {
     }
 
     public HouseStoreSaver load(CompoundTag nbt, HolderLookup.Provider registries) {
-        HouseStoreSaver data = this.create();
+        HouseStoreSaver data = create();
         HouseManager.getInstance().load(HouseManager.CODEC.decode(JsonOps.INSTANCE, GsonHelper.parse(nbt.getString(NAME))).result().get().getFirst());
         return data;
     }

@@ -56,7 +56,7 @@ public class TEDataGenerator {
         generator.addProvider(server, new TEItemTagsProvider(output, lookup, blockTagsProvider.contentsGetter(), helper));
         generator.addProvider(server, new TEEnchantmentTagsProvider(output, lookup, helper));
         generator.addProvider(server, TELootTableProvider.getProvider(output, lookup));
-        generator.addProvider(server, new CollectRecipeProvider(output, lookup, TERecipeProvider::new));
+        generator.addProvider(server, new CollectRecipeProvider("terra_entity:server", output, lookup, TERecipeProvider::new));
         generator.addProvider(server, new TENPCShopProvider(output, lookup));
         generator.addProvider(server, new NPCNameProvider(output, lookup));
         generator.addProvider(server, new NPCMoodProvider(output, lookup));
